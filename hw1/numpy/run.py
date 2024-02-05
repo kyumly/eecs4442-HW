@@ -89,7 +89,6 @@ def main():
         for seed in SEEDS:
             np.random.seed(seed)
             data = gen_fn()
-
             try:
                 # If gen_fn returns a tuple, spread them as positional args
                 if isinstance(data, tuple):

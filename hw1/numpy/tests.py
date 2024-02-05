@@ -3,6 +3,9 @@ import numpy as np
 
 def t1(L):
     """
+    numpy 문제
+    """
+    """
     Inputs:
     - L: A list of M numpy arrays, each of shape (1, N)
 
@@ -14,10 +17,15 @@ def t1(L):
 
     Hint: vstack/hstack/dstack, no for loop
     """
-    return None
+    answer = np.vstack(L)
+    return answer
 
 
 def t2(X):
+    """
+    고유벡터 구하는 문제
+    
+    """
     """
     Inputs:
     - X: A numpy array of shape (N, N)
@@ -34,10 +42,15 @@ def t2(X):
     2) np.argmin
     3) Watch rows and columns!
     """
-    return None
+    val, vec = np.linalg.eig(X)
+    corresponding = np.argmin(val)
+    return vec[:, corresponding]
 
 
 def t3(X):
+    """
+    numpy 문제
+    """
     """
     Inputs:
     - A: A numpy array of any shape
@@ -54,10 +67,15 @@ def t3(X):
     2) X[S] = v assigns the value v to all entires of X corresponding to
        true values of S.
     """
-    return None
+    X_c = X.copy()
+    X_c[X < 0] = 0
+    return X_c
 
 
 def t4(R, X):
+    """
+    내적하는 문제
+    """
     """
     Inputs:
     - R: A numpy array of shape (3, 3) giving a rotation matrix
@@ -74,10 +92,14 @@ def t4(R, X):
        by the matrix R.
     2) .T gives the transpose of a matrix
     """
-    return None
+    Y = np.dot(X, R.T)
+    return Y
 
 
 def t5(X):
+    """
+    넘파이 슬라이싱 문제
+    """
     """
     Inputs:
     - X: A numpy array of shape (N, N)
@@ -94,10 +116,13 @@ def t5(X):
        from rows y0 to (but not including!) y1
        from columns x0 (but not including!) x1
     """
-    return None
+    return X[:4, :4] - X[-4:, -4:]
 
 
 def t6(N):
+    """
+    넘파이 슬라이싱 구하는 문제
+    """
     """
     Inputs:
     - N: An integer
@@ -109,10 +134,15 @@ def t6(N):
     Par: 6 lines
     Instructor: 3 lines
     """
-    return None
+    data = np.ones((N, N), dtype=float)
+    data[0:5, :] = data[-5:, :] = data[:, 0:5] =  data[:, -5:] = 0
+    return data
 
 
 def t7(X):
+    """
+    벡터 Norm 구하는 문제
+    """
     """
     Inputs:
     - X: A numpy array of shape (N, M)
@@ -133,10 +163,13 @@ def t7(X):
     4) Elementwise operations between an array of shape (N, M) and an array of
        shape (N,) won't work -- try reshaping
     """
-    return None
+    return X/np.sqrt(np.power(X, 2).sum(axis=1)).reshape(-1, 1)
 
 
 def t8(X):
+    """
+    표준 정규 분포 구하기
+    """
     """
     Inputs:
     - X: A numpy array of shape (N, M)
@@ -153,7 +186,10 @@ def t8(X):
     2) Normalize the rows individually
     3) You may have to reshape
     """
-    return None
+    mean = X.mean(axis=1, keepdims=True)
+    std = X.std(axis=1, keepdims=True)
+    X = (X - mean) / std
+    return X
 
 
 def t9(q, k, v):
@@ -175,7 +211,10 @@ def t9(q, k, v):
     2) Recall that np.sum has useful "axis" and "keepdims" options
     3) np.exp and friends apply elementwise to arrays
     """
-    return None
+    norm = np.exp(-((k - q) * (k - q)).sum(axis=1, keepdims=True)) * v
+
+
+    return np.sum(norm, axis=0)[0]
 
 
 def t10(Xs):
@@ -199,6 +238,46 @@ def t10(Xs):
     5) Our 3-line solution uses no loops, and uses the algebraic trick from the
        next problem.
     """
+    x=[i for i in Xs]
+
+    #data = np.array(x).reshape(len(x), -1)
+
+    data = np.arange(27).reshape(3, 3,3)
+    N = len(data)
+    zero_data = np.zeros((N, N))
+    #print(zero_data.shape)
+    #print("갯수 : ", len(data))
+
+    data = data.reshape(3, -1)
+    for i in range(0, len(data)):
+        #print(np.power(data[i] - data, 2))
+        new_data = np.sum(np.power(data[i] - data, 2), axis=1)
+        print("new + asd" , new_data)
+        zero_data[i] = np.sqrt(new_data)
+
+    print("데이터 : \n", zero_data)
+    # # print(zero_data)
+    # # x = np.sum(np.power(Xs, 2), axis=1, keepdims=True)
+    # # x_d = np.sum(np.power(Xs, 2), axis=1)
+    # # result = x + x_d - 2 * XS @ Xs.T
+    #
+    Xs = np.arange(27).reshape(3, 3, 3)
+    # L = len(Xs)
+    # # print("asd : \n",  Xs)
+    centroids = np.array([np.mean(X, axis=0) for X in Xs])
+    # print("평균값 : ", centroids)
+
+    # Broadcasting to calculate squared distances efficiently
+    centroid_diff = centroids[:, np.newaxis, :] - centroids[np.newaxis, :, :]
+    # print(centroid_diff)
+    squared_distances = np.sum(centroid_diff**2, axis=2)
+    print(np.sum(centroid_diff, axis=2))
+    # Taking the square root to get Euclidean distances
+    distance_matrix = np.sqrt(squared_distances)
+    print(distance_matrix)
+    print("첫번째 실행 : ", distance_matrix[1])
+
+
     return None
 
 
@@ -224,6 +303,7 @@ def t11(X):
        causing the square root to crash. Just take max(0, value) before the
        square root. Seems to occur on Macs.
     """
+    print(X.shape)
     return None
 
 
