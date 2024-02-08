@@ -240,45 +240,62 @@ def t10(Xs):
     """
     x=[i for i in Xs]
 
-    #data = np.array(x).reshape(len(x), -1)
 
-    data = np.arange(27).reshape(3, 3,3)
+
+
+    data = np.arange(27).reshape(3, -1)
     N = len(data)
     zero_data = np.zeros((N, N))
+
     #print(zero_data.shape)
     #print("갯수 : ", len(data))
 
-    data = data.reshape(3, -1)
-    for i in range(0, len(data)):
-        #print(np.power(data[i] - data, 2))
-        new_data = np.sum(np.power(data[i] - data, 2), axis=1)
-        print("new + asd" , new_data)
-        zero_data[i] = np.sqrt(new_data)
+    # data = data.reshape(3, -1)
+    # for i in range(0, len(data)):
+    #     #print(np.power(data[i] - data, 2))
+    #     distinct = data[i] - data
+    #     #print(distinct.reshape(3, 3, 3))
+    #     new_data = np.sum(np.power(data[i] - data, 2), axis=1)
+    #     #print("new + asd" , new_data)
+    #     zero_data[i] = np.sqrt(new_data)
+    # #
+    #print("데이터 : \n", zero_data)
 
-    print("데이터 : \n", zero_data)
-    # # print(zero_data)
-    # # x = np.sum(np.power(Xs, 2), axis=1, keepdims=True)
-    # # x_d = np.sum(np.power(Xs, 2), axis=1)
-    # # result = x + x_d - 2 * XS @ Xs.T
+    X = np.array(x).reshape(len(x), -1)
+    Xs = np.arange(27).reshape(3, -1)
+    #X = np.arange(27).reshape(3, -1)
+    x_hat = np.sum(np.power(X, 2), axis=1, keepdims=True)
+    y_hat = np.sum(np.power(X, 2),axis=1, keepdims=True)
+    D = x_hat + y_hat.T -2*np.dot(X, X.T)
+    D= np.sqrt(np.maximum(0, D))
+
+
+    # x = np.sum(np.power(Xs, 2), axis=1, keepdims=True)
+    # x_d = np.sum(np.power(Xs, 2), axis=1)
+    # result = x + x_d - 2 * Xs @ Xs.T
+    # print(np.sqrt(result))
+    # #
+    # print("결ㄱ")
+    # Xs = np.arange(27).reshape(3, 3, 3)
+    # # # L = len(Xs)
+    # # # print("asd : \n",  Xs)
+    # centroids = np.array([np.mean(X, axis=0) for X in Xs])
+    # print(centroids)
     #
-    Xs = np.arange(27).reshape(3, 3, 3)
-    # L = len(Xs)
-    # # print("asd : \n",  Xs)
-    centroids = np.array([np.mean(X, axis=0) for X in Xs])
-    # print("평균값 : ", centroids)
-
-    # Broadcasting to calculate squared distances efficiently
-    centroid_diff = centroids[:, np.newaxis, :] - centroids[np.newaxis, :, :]
-    # print(centroid_diff)
-    squared_distances = np.sum(centroid_diff**2, axis=2)
-    print(np.sum(centroid_diff, axis=2))
-    # Taking the square root to get Euclidean distances
-    distance_matrix = np.sqrt(squared_distances)
-    print(distance_matrix)
-    print("첫번째 실행 : ", distance_matrix[1])
+    # # print("평균값 : ", centroids)
+    # #
+    # # Broadcasting to calculate squared distances efficiently
+    # centroid_diff = centroids[:, np.newaxis, :] - centroids[np.newaxis, :, :]
+    # print(centroids[:, np.newaxis, :])
+    # squared_distances = np.sum(centroid_diff**2, axis=2)
+    # print(np.sum(centroid_diff**2, axis=2))
+    # # Taking the square root to get Euclidean distances
+    # distance_matrix = np.sqrt(squared_distances)
+    # print(distance_matrix)
+    # #print("첫번째 실행 : ", distance_matrix[1])
 
 
-    return None
+    return D
 
 
 def t11(X):
@@ -303,8 +320,25 @@ def t11(X):
        causing the square root to crash. Just take max(0, value) before the
        square root. Seems to occur on Macs.
     """
-    print(X.shape)
-    return None
+
+    #vector
+    x_hat = np.sum(np.power(X, 2), axis=1, keepdims=True)
+    y_hat = np.sum(np.power(X, 2),axis=1, keepdims=True)
+    D = x_hat + y_hat.T - 2 * np.dot(X, X.T)
+    D= np.sqrt(np.maximum(0, D))
+    return D
+
+
+    # #loop
+    # print(X.shape)
+    # N, _ = X.shape
+    # zero_shape = np.zeros((N, N))
+    # for i in range(0, len(X)):
+    #     #print(np.power(data[i] - data, 2))
+    #     #print(distinct.reshape(3, 3, 3))
+    #     new_data = np.sum(np.power(X[i] - X, 2),axis=1)
+    #     zero_shape[i] = np.sqrt(new_data)
+    # return zero_shape
 
 
 def t12(X, Y):
@@ -323,7 +357,15 @@ def t12(X, Y):
 
     Hints: Similar to previous problem
     """
-    return None
+    x = np.sum(np.power(X, 2), axis=1, keepdims=True)
+    y = np.sum(np.power(Y, 2), axis=1, keepdims=True)
+    dot = -2 * np.dot(X, Y.T)
+
+    result = np.maximum(0, x + y.T +dot)
+    result = np.sqrt(result)
+
+
+    return result
 
 
 def t13(q, V):
@@ -340,7 +382,7 @@ def t13(q, V):
 
     Hint: np.argmax
     """
-    return None
+    return np.argmax(q @ V.T)
 
 
 def t14(X, y):
@@ -357,7 +399,25 @@ def t14(X, y):
 
     Hint: np.linalg.lstsq or np.linalg.solve
     """
-    return None
+    #A = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    #b = np.array([[5], [7], [8]])
+    #x, resid, rank, s = np.linalg.lstsq(A, b)
+    #print("X : ", x)
+    #print("R : ",  resid)
+    #print("r : ", rank)
+    #print("s : ",s)
+
+
+    #print(A.shape, b.shape)
+    x, resid, rank, s = np.linalg.lstsq(X, y)
+    # print("X : ", x)
+    # print("R : ",  resid)
+    # print("r : ", rank)
+    # print("s : ",s)
+    #print(a)
+    #print(b)
+    #print(c)
+    return x
 
 
 def t15(X, Y):
@@ -375,7 +435,8 @@ def t15(X, Y):
 
     Hint: np.cross
     """
-    return None
+    a = np.cross(X, Y)
+    return a
 
 
 def t16(X):
@@ -395,7 +456,8 @@ def t16(X):
     1) If it doesn't broadcast, reshape or np.expand_dims
     2) X[:, -1] gives the last column of X
     """
-    return None
+    k = X[:, 0:2] / np.expand_dims(X[:, 2], axis=1)
+    return k
 
 
 def t17(X):
@@ -413,7 +475,9 @@ def t17(X):
 
     Hint: np.hstack, np.ones
     """
-    return None
+    k = np.ones((100, 5))
+    k[:, 0:4] = X
+    return k
 
 
 def t18(N, r, x, y):
@@ -437,6 +501,11 @@ def t18(N, r, x, y):
     it without them, but np.meshgrid and np.arange are easier to understand. 
     2) Arrays have an astype method
     """
+    print(N)
+    print(r)
+    print(x)
+    print(y)
+
     return None
 
 
@@ -477,4 +546,11 @@ def t20(N, v):
        (The sign of the numerator tells which side the point is on)
     2) np.abs
     """
-    return None
+    N = 3
+    a, b, c = v
+    x = np.arange(N * N).reshape(N, N)
+    print(x)
+    print(x.shape)
+    #M = np.abs(a * x + b * y + c) / np.sqrt(a ** 2 + b ** 2)
+
+    return M
