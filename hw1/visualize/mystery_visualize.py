@@ -7,12 +7,36 @@ import cv2
 import pdb
 
 
-"""
-docker, git-flow 
-tool : torch, tensorflows
-"""
 
 
+def data_mapping2(X, colors):
+    print(colors.shape)
+    # 플로팅
+    # get_spectrum(colors)
+
+    channels = cv2.split(X)
+
+    W, H, N = data.shape
+
+    data_total = np.zeros((N, W, H, 3))
+
+    for index, channel in enumerate(channels):
+        merge_list = []
+        ex = cv2.normalize(channel, None, 0, 255, cv2.NORM_MINMAX)
+        ex = channel
+        for color in colors.T:
+            """
+            R, G , B 순서
+            """
+            colors_image = cv2.LUT(ex, color)
+            merge_list.append(colors_image)
+
+        image = np.stack(merge_list, axis=2)
+        #image[:, :, 0], image[:, :, 2] = image[:, :, 2], image[:, :, 0]
+        data_total[index] = image
+
+
+    return data_total
 
 
 def data_preprocessing(image):
@@ -62,7 +86,6 @@ def grid(X):
 def colormapArray(X, colors):
     """
     Basically plt.imsave but return a matrix instead
-
     Given:
         a HxW matrix X
         a Nx3 color map of colors in [0,1] [R,G,B]
@@ -79,13 +102,26 @@ def colormapArray(X, colors):
     # plt.imshow()
 
     #X = data_preprocessing(X)
-
+    X = X.astype(np.uint8)
+    images = data_mapping2(X, colors)
+    images = (images * 255).astype(np.uint8)
     x_mean, x_std =cv2.meanStdDev(X)
     print_matInfo("X", X)
 
     print(f"평균값 {x_mean.reshape(-1)} \n"
           f" 분산값 : {x_std.reshape(-1)}")
-    grid(X)
+    #grid(X)
+
+
+    fig = plt.figure(figsize=(10,10))
+
+    N = images.shape[0]
+
+    for i in range(N):
+        ax = fig.add_subplot(3, 3, i+1)
+        ax.imshow(images[i], )
+
+    plt.show()
 
     return None
 
@@ -99,62 +135,12 @@ def get_spectrum(colors):
     plt.show()
 
 
+
+
 if __name__ == "__main__":
     colors = np.load("mysterydata/colors.npy")
     data = np.load("mysterydata/mysterydata4.npy")
 
-    print(colors.shape)
-    data = data.astype(np.uint8)
-
-    # 플로팅
-    #get_spectrum(colors)
-
-    ex = data[:, :, 0]
-    # channels = cv2.split(data)
-
-    # print(colors[:, 0])
-    #colors[:,0], colors[:,2] =colors[:,2],colors[:,0]
-    # print(colors[:, 2])
-
-    # for channel in channels:
-    #     merge_list = []
-    #     #ex_normalize = cv2.normalize(channel, None, 0, 255, cv2.NORM_MINMAX)
-    #     for color in colors.T:
-    #         """
-    #         R, G , B 순서
-    #         """
-    #         colors_image = cv2.LUT(channel, color)
-    #         merge_list.append(colors_image)
-    #
-    #     break
-
-    # colors_image =np.stack(merge_list, axis=2)
-
-    #print(colors_image[0][200])
-    #print(colors_image[0].max(), colors_image[0].min())
-    # print(channels[0].shape)
-    # print(colors.T[0:1, :].shape)
-
-    r = colors.T[0:1, :][:, ex]
-    g = colors.T[1:2, :][:, ex]
-    b = colors.T[2:3, :][:, ex]
-
-
-    colors_image = r[0]
-
-    plt.imshow(ex)
-    plt.title('original Image')
-    plt.axis('off')
-    plt.show()
-
-    plt.imshow(colors_image)
-    print(colors_image)
-    plt.title('Colored Image')
-    plt.axis('off')
-    plt.show()
-
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-
-    #colormapArray(data, colors)
     #pdb.set_trace()
+
+    colormapArray(data, colors)
