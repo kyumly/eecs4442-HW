@@ -62,7 +62,13 @@ def upscaleNN(I, target_size):
 
 def resizeToSquare(I, maxDim):
     """Given an image, make sure it's no bigger than maxDim on either side"""
-    print(maxDim)
+    H, W, C = I.shape
+    if np.max((H, W)) > maxDim:
+        down_ratio = maxDim / np.max((H, W))
+        H_new = (H * down_ratio).astype(int)
+        W_new = (W * down_ratio).astype(int)
+        I = cv2.resize(I, (W_new, H_new), interpolation=cv2.INTER_LINEAR)
+
     return I
 
 
@@ -72,36 +78,19 @@ def quantize(v, palette):
     return the index of the closest value
     """
     # v : np.ndarray
-    # v.argmin()
-    # # p_min = palette.min()
-    # # p_max = palette.max()
     # #
-    # # v_min = abs(v - p_min)
-    # # v_max = abs(v - p_max)
-    # #
-    # # v[v_min > v_max] = 1
-    # # v[~(v_min > v_max)] = 0
-    # #
-    # # v = v.astype(np.uint8)
-    # p_min, p_max = palette.argmin(), palette.argmax()
-    # print(p_max, p_min)
+    # output = np.zeros(v.shape, dtype=np.uint8)
+    # for index, rows in enumerate(v):
+    #     index_list = []
     #
-    # v_min = abs(v - palette[p_min])
-    # v_max = abs(v - palette[p_max])
-    #
-    # v = np.where(v_min > v_max, p_min, p_max).astype(np.uint8)
-    v : np.ndarray
-    #
-    output = np.zeros(v.shape, dtype=np.uint8)
-    for index, rows in enumerate(v):
-        index_list = []
-
-        for cols in rows:
-            diff = cols - palette
-            index_list.append(np.abs(diff).argmin())
-        output[index] = np.array(index_list)
-
-    return output
+    #     for cols in rows:
+    #         diff = cols - palette
+    #         index_list.append(np.abs(diff).argmin())
+    #     output[index] = np.array(index_list)
+    palette = np.array(palette)
+    v = np.array(v)
+    idx = np.argmin(np.abs(palette.reshape(-1, 1) - v.reshape(1, -1)), axis=0).astype(np.uint8).reshape(v.shape)
+    return idx
 
 
 def quantizeNaive(IF, palette):
@@ -115,6 +104,7 @@ def quantizeFloyd(IF, palette):
     """
     Given a floating-point image return quantized version (Floyd-Steinberg)
     """
+    print(IF.shape)
     output = np.zeros(IF.shape, dtype=np.uint8)
 
     H, W = IF.shape
@@ -129,15 +119,14 @@ def quantizeFloyd(IF, palette):
 
             newValue = palette[colorIndex]
             error = oldValue - newValue
-            x= H-1
-            if 0 < x < H - 1 and 0 <= y + 1 < W:
-                pixel[x][y + 1] += error * 5 / 16
-            if 0 < x + 1< H  and 0 <= y  < W:
-                pixel[x + 1][y] += error * 7 / 16
-            if 0 < x -1 < H - 1 and 0 <= y + 1 < W:
-                pixel[x - 1][y + 1] += error * 3 / 16
-            if 0 < x +1 < H - 1 and 0 <= y + 1 < W:
-                pixel[x + 1][y + 1] += error * 1 / 16
+            if y + 1 < W:
+                IF[x, y + 1] += error * 7 / 16
+            if x + 1 < H:
+                IF[x + 1, y - 1] += error * 3 / 16
+                IF[x + 1, y] += error * 5 / 16
+            if x + 1 < H and y + 1 < W:
+                IF[x + 1, y + 1] += error * 1/16
+
     return output
 
 
