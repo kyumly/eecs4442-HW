@@ -89,14 +89,24 @@ def quantize(v, palette):
     #     output[index] = np.array(index_list)
     palette = np.array(palette)
     v = np.array(v)
-    idx = np.argmin(np.abs(palette.reshape(-1, 1) - v.reshape(1, -1)), axis=0).astype(np.uint8).reshape(v.shape)
+    idx = np.argmin(np.abs(palette.reshape(-1, 1) - v.reshape(1, -1)), axis=0).astype(np.uint8)
     return idx
 
 
 def quantizeNaive(IF, palette):
     """Given a floating-point image return quantized version (Naive)"""
     # quantizing multiple
-    output = quantize(IF, palette)
+
+    palette = np.array(palette)
+    output = np.zeros_like(IF, dtype=np.uint8)
+    if len(IF.shape) < 3:
+        H, W = IF.shape
+    else:
+        H, W, C = IF.shape
+
+    for i in range(H):
+        idx = quantize(IF[i], palette)
+        output[i] = idx.reshape(1, -1)
     return output
 
 
