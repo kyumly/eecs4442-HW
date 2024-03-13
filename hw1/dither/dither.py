@@ -62,6 +62,7 @@ def upscaleNN(I, target_size):
 
 def resizeToSquare(I, maxDim):
     """Given an image, make sure it's no bigger than maxDim on either side"""
+    print(maxDim)
     return I
 
 
@@ -70,20 +71,74 @@ def quantize(v, palette):
     Given a scalar v and array of values palette,
     return the index of the closest value
     """
-    return 0
+    # v : np.ndarray
+    # v.argmin()
+    # # p_min = palette.min()
+    # # p_max = palette.max()
+    # #
+    # # v_min = abs(v - p_min)
+    # # v_max = abs(v - p_max)
+    # #
+    # # v[v_min > v_max] = 1
+    # # v[~(v_min > v_max)] = 0
+    # #
+    # # v = v.astype(np.uint8)
+    # p_min, p_max = palette.argmin(), palette.argmax()
+    # print(p_max, p_min)
+    #
+    # v_min = abs(v - palette[p_min])
+    # v_max = abs(v - palette[p_max])
+    #
+    # v = np.where(v_min > v_max, p_min, p_max).astype(np.uint8)
+    v : np.ndarray
+    #
+    output = np.zeros(v.shape, dtype=np.uint8)
+    for index, rows in enumerate(v):
+        index_list = []
+
+        for cols in rows:
+            diff = cols - palette
+            index_list.append(np.abs(diff).argmin())
+        output[index] = np.array(index_list)
+
+    return output
 
 
 def quantizeNaive(IF, palette):
     """Given a floating-point image return quantized version (Naive)"""
     # quantizing multiple
-    return None
+    output = quantize(IF, palette)
+    return output
 
 
 def quantizeFloyd(IF, palette):
     """
     Given a floating-point image return quantized version (Floyd-Steinberg)
     """
-    return None
+    output = np.zeros(IF.shape, dtype=np.uint8)
+
+    H, W = IF.shape
+
+    pixel = IF
+    for x in range(H):
+        for y in range(W):
+            oldValue = pixel[x][y]
+            oldValue = np.array(oldValue).reshape(1, 1)
+            colorIndex = quantize(oldValue, palette)
+            output[x][y] = colorIndex
+
+            newValue = palette[colorIndex]
+            error = oldValue - newValue
+            x= H-1
+            if 0 < x < H - 1 and 0 <= y + 1 < W:
+                pixel[x][y + 1] += error * 5 / 16
+            if 0 < x + 1< H  and 0 <= y  < W:
+                pixel[x + 1][y] += error * 7 / 16
+            if 0 < x -1 < H - 1 and 0 <= y + 1 < W:
+                pixel[x - 1][y + 1] += error * 3 / 16
+            if 0 < x +1 < H - 1 and 0 <= y + 1 < W:
+                pixel[x + 1][y + 1] += error * 1 / 16
+    return output
 
 
 def quantizeFloydGamma(IF, palette):
@@ -91,6 +146,7 @@ def quantizeFloydGamma(IF, palette):
     Given a floating-point image return quantized version
     (Floyd-Steinberg with Gamma Correction)
     """
+
     return None
 
 
