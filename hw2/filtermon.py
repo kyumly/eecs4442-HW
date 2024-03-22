@@ -3,6 +3,8 @@ import scipy.signal
 import matplotlib.pyplot as plt
 
 
+
+
 def conv(I, f):
     """Apply same-sized convolution with a filter with zero-padding"""
     # Note that this is convolution! This is filtering but with f[::-1,::-1]
